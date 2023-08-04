@@ -1,9 +1,15 @@
 use anyhow::{anyhow, Result};
-use reqwest::{Response, Error};
+use reqwest;
 use serde::{Deserialize, Serialize};
 use std::env;
 use dotenv;
 
+
+#[derive(Debug, Clone, Serialize)]
+pub struct ResendResponse {
+    message: String,
+    content: String,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Payload {
@@ -46,7 +52,13 @@ impl ResendPayload {
 
         match res.status() {
             reqwest::StatusCode::OK => {
-                Ok("Success: Email sent.".to_owned())
+                let response: serde_json::Value = res.json().await?;
+                let resend_response = ResendResponse {
+                    message: "Success: Email sent.".to_owned(),
+                    content: response.to_string(),
+                }; 
+
+                Ok(format!("{:?}",resend_response))
             },
             reqwest::StatusCode::UNAUTHORIZED => {
                 Err(anyhow!("Error: UNAUTHORIZED"))
