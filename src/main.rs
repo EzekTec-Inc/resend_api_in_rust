@@ -77,8 +77,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let payload = Payload {
         from: "onboarding@resend.dev".to_owned(),
         to: env::var("TO_EMAIL")?.to_owned(),
-        subject: "Additional from Resend".to_owned(),
-        html: "<p>Congrats again on sending another <strong>custom email</strong>!</p>".to_owned(),
+        subject: "Demo email from Resend".to_owned(),
+        html: "<p>Congrats on sending a <strong>custom email</strong>!</p>".to_owned(),
     };
 
     let payload_to_send = ResendPayload::new(
