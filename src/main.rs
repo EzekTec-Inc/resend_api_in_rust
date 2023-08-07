@@ -71,7 +71,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let payload = ResendPayload::new(
         "https://api.resend.com/emails".to_owned(),
-        //format!("Bearer {}", env::var("AUTHORIZATION_API_KEY")?),
         env::var("AUTHORIZATION_API_KEY")?,
         "application/json".to_owned(),
         Payload {
