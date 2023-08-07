@@ -1,9 +1,8 @@
 use anyhow::{anyhow, Result};
+use dotenv;
 use reqwest;
 use serde::{Deserialize, Serialize};
 use std::env;
-use dotenv;
-
 
 #[derive(Debug, Clone, Serialize)]
 pub struct ResendResponse {
@@ -41,12 +40,12 @@ impl ResendPayload {
         let client = reqwest::Client::new();
         let res: reqwest::Response = client
             .post(&self.uri)
-            .header("Authorization", &self.authorization)
+            .bearer_auth(&self.authorization)
             .header("Content-Type", &self.header)
-            .json(&serde_json::json!(&self.body))
+            .json(&self.body)
             .send()
             .await?;
-        
+
         // println!("RESPONSE: {:#?}", &res); // NOTE: Please remove this line as it's only here
         // for testing purposes.
 
@@ -56,16 +55,12 @@ impl ResendPayload {
                 let resend_response = ResendResponse {
                     message: "Success: Email sent.".to_owned(),
                     content: response.to_string(),
-                }; 
+                };
 
-                Ok(format!("{:?}",resend_response))
-            },
-            reqwest::StatusCode::UNAUTHORIZED => {
-                Err(anyhow!("Error: UNAUTHORIZED"))
-            },
-            _ => {
-                Err(anyhow!("Error: All other ERRORS!."))
+                Ok(format!("{:?}", resend_response))
             }
+            reqwest::StatusCode::UNAUTHORIZED => Err(anyhow!("Error: UNAUTHORIZED")),
+            _ => Err(anyhow!("Error: All other ERRORS!.")),
         }
     }
 }
@@ -73,22 +68,22 @@ impl ResendPayload {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     dotenv::dotenv().ok();
-    
-    let payload = Payload {
-        from: "onboarding@resend.dev".to_owned(),
-        to: env::var("TO_EMAIL")?.to_owned(),
-        subject: "Demo email from Resend".to_owned(),
-        html: "<p>Congrats on sending a <strong>custom email</strong>!</p>".to_owned(),
-    };
 
-    let payload_to_send = ResendPayload::new(
+    let payload = ResendPayload::new(
         "https://api.resend.com/emails".to_owned(),
-        format!("Bearer {}", env::var("AUTHORIZATION_API_KEY")?),
+        //format!("Bearer {}", env::var("AUTHORIZATION_API_KEY")?),
+        env::var("AUTHORIZATION_API_KEY")?,
         "application/json".to_owned(),
-        payload,
+        Payload {
+            from: "onboarding@resend.dev".to_owned(),
+            to: env::var("TO_EMAIL")?,
+            subject: "Demo email from Resend".to_owned(),
+            html: "<p>Congrats on sending a <strong>custom email</strong> using <strong>Resend</strong> api</p>"
+                .to_owned(),
+        },
     );
 
-    let response = payload_to_send.send_email().await?;
+    let response = payload.send_email().await?;
 
     println!("{:#?}", response);
 
