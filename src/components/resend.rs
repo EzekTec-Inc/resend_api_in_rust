@@ -27,10 +27,10 @@ impl EmailPayload {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResendSDK {
-    pub uri: String,
-    pub auth: String,
-    pub header: String,
-    pub body: EmailPayload,
+    uri: String,
+    auth: String,
+    header: String,
+    body: EmailPayload,
 }
 
 impl ResendSDK {
