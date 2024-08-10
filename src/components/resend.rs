@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct ResendSDKResponse {
     message: String,
     content: String,
+    status: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -70,6 +71,7 @@ impl ResendSDK {
                 let resend_response = ResendSDKResponse {
                     message: "Success: Email sent.".to_owned(),
                     content: response.to_string(),
+                    status: "200".to_owned(),
                 };
                 Ok(format!("{:?}", resend_response))
             }
