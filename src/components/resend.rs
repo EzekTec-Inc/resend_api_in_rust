@@ -56,7 +56,8 @@ impl ResendSDKInterface for ResendSDK {
     }
     /// Returns the send email of this [`ResendSDK`].
     ///
-    /// # Errors [`reqwest::Error`]
+    /// # Errors [`anyhow::Error`] // the anyhow::Error is returned instead of returning a
+    /// reqwest::Error, which we don't want the user of the library to concern themselves with.
     ///
     /// This function will return an error if the api-endpoint is not reachable.
     async fn send_email(&self) -> Result<String, anyhow::Error> {
