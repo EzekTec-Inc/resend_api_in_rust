@@ -1,7 +1,6 @@
 mod components;
 
-use crate::components::resend::{EmailPayload, ResendSDK};
-
+use crate::components::resend::{EmailPayload, ResendSDK, ResendSDKInterface};
 use std::env;
 
 //NOTE: This could be success or it could emit an error. The only reason of wrapping it here is to simplify the response on the main handler.
@@ -66,9 +65,9 @@ mod tests {
 
         let test_response = test_payload.send_email().await;
 
-        assert!(!test_response.is_ok()); // This is a false test as its already returning and error
-                                         // and I manually inverted the logic here just to make it pass testing. Need to investigate
-                                         // why the service call here is failing in testing.
+        assert!(test_response.is_ok()); // This is a false test as its already returning and error
+                                        // and I manually inverted the logic here just to make it pass testing. Need to investigate
+                                        // why the service call here is failing in testing.
 
         //assert!(!test_response
         //    .expect("test_send_email() Error unwrapping response")

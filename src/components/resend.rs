@@ -1,6 +1,12 @@
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 
+pub trait ResendSDKInterface {
+    fn init(uri: String, header: String, auth: String) -> Self;
+    fn with_email_payload(&mut self, email_payload: EmailPayload) -> Self;
+    async fn send_email(&self) -> Result<String, anyhow::Error>;
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResendSDKResponse {
     message: String,
@@ -34,9 +40,9 @@ pub struct ResendSDK {
     body: EmailPayload,
 }
 
-impl ResendSDK {
+impl ResendSDKInterface for ResendSDK {
     /// Initializes the SDK.
-    pub fn init(uri: String, header: String, auth: String) -> Self {
+    fn init(uri: String, header: String, auth: String) -> Self {
         Self {
             uri,
             auth,
@@ -44,18 +50,16 @@ impl ResendSDK {
             body: EmailPayload::default(),
         }
     }
-    /// Sets the email payload.
-    pub fn with_email_payload(&mut self, email_payload: EmailPayload) -> Self {
+    fn with_email_payload(&mut self, email_payload: EmailPayload) -> Self {
         self.body = email_payload;
         self.clone()
     }
-
     /// Returns the send email of this [`ResendSDK`].
     ///
     /// # Errors [`reqwest::Error`]
     ///
     /// This function will return an error if the api-endpoint is not reachable.
-    pub async fn send_email(&self) -> Result<String, anyhow::Error> {
+    async fn send_email(&self) -> Result<String, anyhow::Error> {
         let client = reqwest::Client::new();
         let res: reqwest::Response = client
             .post(&self.uri)
@@ -64,7 +68,6 @@ impl ResendSDK {
             .json(&self.body)
             .send()
             .await?;
-
         match res.status() {
             reqwest::StatusCode::OK => {
                 let response: serde_json::Value = res.json().await?;
