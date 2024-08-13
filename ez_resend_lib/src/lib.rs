@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 pub trait ResendSDKInterface {
     fn init(uri: String, header: String, auth: String) -> Self;
     fn with_email_payload(&mut self, email_payload: EmailPayload) -> Self;
-    async fn send_email(&self) -> Result<String, anyhow::Error>;
+    fn send_email(&self)
+        -> impl std::future::Future<Output = Result<String, anyhow::Error>> + Send;
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -82,5 +83,20 @@ impl ResendSDKInterface for ResendSDK {
             reqwest::StatusCode::UNAUTHORIZED => Err(anyhow!("Error: UNAUTHORIZED")),
             _ => Err(anyhow!("Error: All other send ERRORS!.")),
         }
+    }
+}
+
+pub fn add(left: u64, right: u64) -> u64 {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = add(2, 2);
+        assert_eq!(result, 4);
     }
 }

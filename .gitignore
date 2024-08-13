@@ -1,2 +1,3 @@
 /target
 .env
+/send_email/.env

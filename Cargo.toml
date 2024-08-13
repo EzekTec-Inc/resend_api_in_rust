@@ -1,15 +1,14 @@
-[package]
-name = "resend_sdk_rust"
-version = "0.1.0"
-authors = ["Stephen Ezekwem <stephen.ezekwem@ezektec.com>"]
-edition = "2021"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-tokio = { version = "1.1.1", features = ["full"] }
-reqwest = { version = "0.11", features = ["json"] }
-serde = { version = "1.0.205", features = ["derive"] }
-serde_json = "1.0"
-anyhow = "1.0"
-dotenv = "0.15.0"
+[workspace]
+members = [
+  "ez_resend_lib", "send_email"
+]
+resolver = "2"
+# [dependencies]
+# tokio = { version = "1.1.1", features = ["full"] }
+# reqwest = { version = "0.11", features = ["json"] }
+# serde = { version = "1.0.205", features = ["derive"] }
+# serde_json = "1.0"
+# anyhow = "1.0"
+# dotenv = "0.15.0"
