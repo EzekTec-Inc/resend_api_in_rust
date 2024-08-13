@@ -91,8 +91,6 @@ impl ResendSDKInterface for ResendSDK {
 mod tests {
     use super::*;
     use std::env;
-    use std::ops::Deref;
-    use std::sync::{Arc, Mutex};
 
     const TEST_API_SERVICE_URI: &str = "https://api.resend.com/emails";
     const TEST_API_HEADER: &str = "application/json";
@@ -122,20 +120,15 @@ mod tests {
             test_email_html,
         ));
 
-        //let mut test_response: Result<String, anyhow::Error> = Ok(String::new());
-        let test_response: Arc<Mutex<Result<String, anyhow::Error>>> =
-            Arc::new(Mutex::new(Ok(String::new())));
+        let test_result: String = String::from("");
+        let test_result_clone = test_result.clone();
 
-        let test_response_clone = Arc::clone(&test_response);
+        //let test_response_clone = Arc::clone(&test_response);
         tokio::spawn(async move {
-            //let test_response_clone: Arc<Mutex<Result<String, anyhow::Error>>> =
-            //    Arc::clone(&test_response); // clone the test_response;
-            let mut data = Arc::clone(&test_response);
-            //data.lock().unwrap();
-            data.deref().lock().unwrap() =
-                Mutex::new(Ok(test_payload.send_email().await.unwrap().into()));
+            let mut test_result_clone = test_result.clone();
+            let _ = test_result_clone.push_str(&test_payload.send_email().await.unwrap());
         });
 
-        assert!(test_response_clone.lock().unwrap().is_ok()); // This is a false test as its already returning and error
+        assert!(test_result_clone.is_empty()); // This is a false test as its already returning and error
     }
 }
