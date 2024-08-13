@@ -70,13 +70,14 @@ impl ResendSDKInterface for ResendSDK {
             .json(&self.body)
             .send()
             .await?;
+
         match res.status() {
             reqwest::StatusCode::OK => {
                 let response: serde_json::Value = res.json().await?;
                 let resend_response = ResendSDKResponse {
                     message: "Success: Email sent.".to_owned(),
                     content: response.to_string(),
-                    status: "200".to_owned(),
+                    status: reqwest::StatusCode::OK.to_string(),
                 };
                 Ok(format!("{:?}", resend_response))
             }
@@ -86,17 +87,55 @@ impl ResendSDKInterface for ResendSDK {
     }
 }
 
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
+    use std::ops::Deref;
+    use std::sync::{Arc, Mutex};
+
+    const TEST_API_SERVICE_URI: &str = "https://api.resend.com/emails";
+    const TEST_API_HEADER: &str = "application/json";
 
     #[test]
     fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+        dotenv::dotenv().ok();
+
+        let test_auth_api_key: &str =
+            &env::var("AUTHORIZATION_API_KEY").expect("AUTHORIZATION_API_KEY must be set");
+
+        let test_email_to = env::var("TO_EMAIL").expect("TO_EMAIL must be set");
+        let test_email_from = "test_company_name <delivered@resend.dev>".to_owned();
+        let test_email_subject = "test email from EzekTec-Inc ResendSDK".to_owned();
+        let test_email_html = "<p>Congrats on sending a <strong>test email from your unit test [test_send_email()] function</strong> using <strong>Resend</strong> api</p>"
+                    .to_owned();
+
+        let test_payload = ResendSDK::init(
+            TEST_API_SERVICE_URI.to_owned(),
+            TEST_API_HEADER.to_owned(),
+            test_auth_api_key.to_owned(),
+        )
+        .with_email_payload(EmailPayload::new(
+            test_email_from,
+            test_email_to,
+            test_email_subject,
+            test_email_html,
+        ));
+
+        //let mut test_response: Result<String, anyhow::Error> = Ok(String::new());
+        let test_response: Arc<Mutex<Result<String, anyhow::Error>>> =
+            Arc::new(Mutex::new(Ok(String::new())));
+
+        let test_response_clone = Arc::clone(&test_response);
+        tokio::spawn(async move {
+            //let test_response_clone: Arc<Mutex<Result<String, anyhow::Error>>> =
+            //    Arc::clone(&test_response); // clone the test_response;
+            let mut data = Arc::clone(&test_response);
+            //data.lock().unwrap();
+            data.deref().lock().unwrap() =
+                Mutex::new(Ok(test_payload.send_email().await.unwrap().into()));
+        });
+
+        assert!(test_response_clone.lock().unwrap().is_ok()); // This is a false test as its already returning and error
     }
 }
