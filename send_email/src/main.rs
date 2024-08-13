@@ -1,6 +1,4 @@
-mod components;
-
-use crate::components::resend::{EmailPayload, ResendSDK, ResendSDKInterface};
+use ez_resend_lib::{EmailPayload, ResendSDK, ResendSDKInterface};
 use std::env;
 
 //NOTE: This could be success or it could emit an error. The only reason of wrapping it here is to simplify the response on the main handler.
