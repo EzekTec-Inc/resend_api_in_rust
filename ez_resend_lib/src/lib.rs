@@ -95,8 +95,9 @@ mod tests {
     const TEST_API_SERVICE_URI: &str = "https://api.resend.com/emails";
     const TEST_API_HEADER: &str = "application/json";
 
+    #[tokio::main]
     #[test]
-    fn it_works() {
+    async fn it_works() {
         dotenv::dotenv().ok();
 
         let test_auth_api_key: &str =
@@ -120,10 +121,9 @@ mod tests {
             test_email_html,
         ));
 
-        let test_result: String = String::from("");
+        let test_result = String::from("");
         let test_result_clone = test_result.clone();
 
-        //let test_response_clone = Arc::clone(&test_response);
         tokio::spawn(async move {
             let mut test_result_clone = test_result.clone();
             let _ = test_result_clone.push_str(&test_payload.send_email().await.unwrap());
